@@ -1,44 +1,77 @@
 package com.example.cartapp.data.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cartapp.data.model.CartItem
 import com.example.cartapp.data.model.ProductData
+import com.example.cartapp.db.CartDao
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class CartViewModel @Inject constructor() : ViewModel() {
-    private val _cartItems = mutableStateListOf<CartItem>()
-    val cartItems: List<CartItem> get() = _cartItems
+class CartViewModel @Inject constructor (private val cartDao: CartDao) : ViewModel() {
+    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
+    val cartItems: StateFlow<List<CartItem>> = _cartItems
 
-    fun addToCart(product: ProductData) {
-        // Check if the product is already in the cart
-        val existingItem = _cartItems.find { it.product.id == product.id }
-        if (existingItem != null) {
-            // Increase the quantity
-            existingItem.quantity++
-        } else {
-            // Add new product to the cart
-            _cartItems.add(CartItem(product = product, quantity = 1))
-        }
+
+    init {
+        fetchCartItems()
     }
 
-    fun increaseQuantity(productId: Int) {
-        _cartItems.find { it.product.id == productId }?.let {
-            it.quantity++
-        }
-    }
-
-    fun decreaseQuantity(productId: Int) {
-        val item = _cartItems.find { it.product.id == productId }
-        item?.let {
-            if (it.quantity > 1) {
-                it.quantity--
-            } else {
-                _cartItems.remove(it) // Remove item if quantity becomes 0
+    fun fetchCartItems() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val currentItems = cartDao.getAllCartItems()
+            withContext(Dispatchers.Main) {
+                if (_cartItems.value != currentItems) {
+                    _cartItems.emit(currentItems)
+                }
             }
+        }
+    }
+
+    fun addOrUpdateCartItem(product: ProductData) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val existingItem = cartDao.getCartItemByProductId(product.id)
+            if (existingItem != null) {
+                // Increment quantity if item already exists
+                cartDao.updateCartItemQuantity(product.id, existingItem.quantity + 1)
+            } else {
+                // Add new cart item
+                cartDao.insertCartItem(CartItem(product = product, quantity = 1))
+            }
+            fetchCartItems()
+        }
+    }
+
+    fun deleteCartItem(productId: Int) {
+        viewModelScope.launch {
+            cartDao.deleteCartItemByProductId(productId)
+            fetchCartItems()
+        }
+    }
+
+    fun increaseQuantity(cartItem: CartItem) {
+        viewModelScope.launch(Dispatchers.IO) {
+            cartDao.updateCartItemQuantity(cartItem.product.id, cartItem.quantity + 1)
+            fetchCartItems()
+        }
+    }
+
+    fun decreaseQuantity(cartItem: CartItem) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (cartItem.quantity > 1) {
+                cartDao.updateCartItemQuantity(cartItem.product.id, cartItem.quantity - 1)
+            } else {
+                // Remove the item if quantity is 1
+                cartDao.deleteCartItem(cartItem)
+            }
+            fetchCartItems()
         }
     }
 }

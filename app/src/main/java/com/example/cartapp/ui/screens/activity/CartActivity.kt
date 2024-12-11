@@ -4,7 +4,7 @@ package com.example.cartapp.ui.screens.activity
 import android.app.Activity
 import com.example.cartapp.R
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -34,7 +38,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -57,8 +60,13 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import com.app.cartApp.compose.publicsansBold
+import com.app.cartApp.compose.publicsansRegular
 import com.example.cartapp.data.model.CartItem
+import com.example.cartapp.data.model.ProductData
+import com.example.cartapp.data.model.Rating
 import com.example.cartapp.data.viewmodel.CartViewModel
 import com.example.cartapp.ui.theme.CartAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,9 +101,14 @@ class CartActivity : ComponentActivity() {
         val cartViewModel =hiltViewModel<CartViewModel>()
         val itemSize: Dp = (LocalConfiguration.current.screenWidthDp.dp / 2)
         // Observe the cart items
-        val cartItems = cartViewModel.cartItems
+        val cartItems = cartViewModel.cartItems.collectAsState()
         val context= LocalContext.current as Activity
-
+        var totalPrice = 0.0
+        cartItems.value.forEach { item ->
+            totalPrice += item.product.price * item.quantity
+        }
+        val decimalFormat = DecimalFormat("#.##")
+        val discountedPrice = decimalFormat.format(totalPrice * 0.8)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -140,21 +153,44 @@ class CartActivity : ComponentActivity() {
                     )
                 }
             }
-            Log.d("cartItem","${cartItems}")
-            LazyColumn(modifier = Modifier.padding(top=10.dp)) {
-                items(cartItems.size) { index ->
-                    ProductItem(product = cartItems[index])
+            LazyColumn(modifier = Modifier.padding(top=10.dp).weight(1f)) {
+                items(cartItems.value.size) { index ->
+                    ProductItem(product = cartItems.value[index],
+                        onDeleteCartItem = { cartViewModel.deleteCartItem(it) },
+                        onIncreaseQuantity = {cartViewModel.increaseQuantity(it)},
+                        onDecreaseQuantity = {cartViewModel.decreaseQuantity(it)})
                 }
+            }
+            Row(modifier= Modifier.padding(start = 30.dp,end=30.dp,bottom=10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center) {
+                Column {
+                    Text(text = "₹$discountedPrice", fontFamily =publicsansBold, fontSize = 16.sp)
+                    Text(text = "Grand total", fontFamily = publicsansRegular, fontSize = 16.sp)
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()} ,
+                    modifier = Modifier.width(itemSize),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "Check Out")
+                }
+
             }
         }
 
     }
 
     @Composable
-    fun ProductItem(product: CartItem) {
+    fun ProductItem(product: CartItem,onDeleteCartItem: (Int) -> Unit,
+                    onIncreaseQuantity: (CartItem) -> Unit,
+                    onDecreaseQuantity: (CartItem) -> Unit) {
+
+
         Card(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(10.dp)
                 .fillMaxWidth(),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 4.dp
@@ -171,7 +207,7 @@ class CartActivity : ComponentActivity() {
                         .build()
                 )
                 Image(
-                    painter = painter, // Replace with product image resource
+                    painter = painter,
                     contentDescription = null,
                     modifier = Modifier
                         .size(64.dp)
@@ -182,31 +218,46 @@ class CartActivity : ComponentActivity() {
                     Text(text = product.product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        val price=product.product.price * product.quantity
                         Text(
-                            text = product.product.price.toString(),
+                            text = "₹${price}",
                             fontFamily = publicsansBold,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 textDecoration = TextDecoration.LineThrough,
                                 color = Color.Gray
-                            )
+                            ),
+                            modifier = Modifier.padding(end = 10.dp)
                         )
                         val decimalFormat = DecimalFormat("#.##")
-                        val discountedPrice = decimalFormat.format(product.product.price * 0.8)
+                        val discountedPrice = decimalFormat.format(price * 0.8)
                         Text(
-                            text = discountedPrice,
+                            text = "₹$discountedPrice",
                             fontFamily = publicsansBold,
                             style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary)
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "20% off", color = Color.Green, fontSize = 12.sp)
+                    Text(text = "20% off",
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color("#37877f".toColorInt())),
+                        fontSize = 12.sp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Qty: ${product.quantity}")
-                    IconButton(onClick = { /* Handle delete */ }) {
+                    Row(verticalAlignment = Alignment.CenterVertically){
+                        IconButton(onClick = { onDecreaseQuantity(product) }) {
+                            Icon(painterResource(R.drawable.minus),modifier= Modifier.size(10.dp), contentDescription = "Decrease Quantity")
+                        }
+                        Text(text = product.quantity.toString(), modifier = Modifier.padding(8.dp))
+                        IconButton(onClick = {onIncreaseQuantity(product)}) {
+                            Icon(painterResource(R.drawable.plus),modifier= Modifier.size(15.dp), contentDescription = "Increase Quantity")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    IconButton(onClick = { onDeleteCartItem(product.product.id) }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_delete), // Replace with delete icon resource
+                            painter = painterResource(id = R.drawable.ic_delete),
+                            modifier = Modifier.size(30.dp),
                             contentDescription = "Delete"
                         )
                     }

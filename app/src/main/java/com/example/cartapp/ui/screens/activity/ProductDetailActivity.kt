@@ -3,6 +3,7 @@ package com.example.cartapp.ui.screens.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,16 +25,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,10 +69,12 @@ import coil3.request.crossfade
 import com.app.cartApp.compose.publicsansBold
 import com.app.cartApp.compose.publicsansRegular
 import com.example.cartapp.R
+import com.example.cartapp.data.model.CartItem
 import com.example.cartapp.data.model.ProductData
 import com.example.cartapp.data.viewmodel.CartViewModel
 import com.example.cartapp.ui.theme.CartAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import java.text.DecimalFormat
 
 @AndroidEntryPoint
@@ -81,9 +91,13 @@ class ProductDetailActivity : ComponentActivity() {
                 window.navigationBarColor = MaterialTheme.colorScheme.background.toArgb()
 
                 val navController = rememberNavController()
+                val cartViewModel =hiltViewModel<CartViewModel>()
 
                 Surface(modifier = Modifier.fillMaxSize(), color = Color("#ffffff".toColorInt())) {
-                    ProductDetailScreen(navController)
+                    ProductDetailScreen(navController,
+                        onAddToCartClick = { cartViewModel.addOrUpdateCartItem(it) },
+                        onIncreaseQuantity = {cartViewModel.increaseQuantity(it)},
+                        onDecreaseQuantity = {cartViewModel.decreaseQuantity(it)})
 
                 }
             }
@@ -91,18 +105,29 @@ class ProductDetailActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ProductDetailScreen(navController: NavController){
+    fun ProductDetailScreen(navController: NavController,
+                            onAddToCartClick: (ProductData) -> Unit,
+                            onIncreaseQuantity: (CartItem) -> Unit,
+                            onDecreaseQuantity: (CartItem) -> Unit){
         val context= LocalContext.current as Activity
         val product=context.intent.getSerializableExtra(
             "Product"
         ) as ProductData
 
         val cartViewModel =hiltViewModel<CartViewModel>()
-        val cartItems = cartViewModel.cartItems
         val itemSize: Dp = (LocalConfiguration.current.screenWidthDp.dp / 2)
+        val cartItems = cartViewModel.cartItems.collectAsState().value
         val existingItem = cartItems.find { it.product.id == product.id }
         val quantity = existingItem?.quantity ?: 0
 
+        val cartSize = remember(cartItems) { cartItems.size }
+
+        LaunchedEffect(true) {
+            while (true) {
+                delay(100)
+                cartViewModel.fetchCartItems()
+            }
+        }
         Column(
             modifier = Modifier
 
@@ -146,15 +171,34 @@ class ProductDetailActivity : ComponentActivity() {
                         color = Color("#333333".toColorInt())
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    Image(
-                        painterResource(R.drawable.cart_img),
-                        contentDescription = "",
-                        modifier = Modifier
-                            .width(25.dp).clickable(){
-                                val i = Intent(context, CartActivity::class.java)
-                                context.startActivity(i)
-                            }
-                    )
+                    Box( modifier = Modifier
+                        .size(50.dp)){
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .size(20.dp)
+                                .background(Color.Gray, shape = CircleShape)
+                        ) {
+                            Text(
+                                text = cartSize.toString(),
+                                fontSize = 8.sp,
+                                color = Color.White,
+                                fontFamily = publicsansBold,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+
+                        Image(
+                            painterResource(R.drawable.cart_img),
+                            contentDescription = "",
+                            modifier = Modifier.align(Alignment.Center)
+                                .width(20.dp).clickable(){
+                                    val i = Intent(context, CartActivity::class.java)
+                                    context.startActivity(i)
+                                }
+                        )
+
+                    }
                 }
             }
             Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(5.dp).weight(1f)) {
@@ -259,15 +303,42 @@ class ProductDetailActivity : ComponentActivity() {
 
             }
 
+            Row(modifier = Modifier.fillMaxWidth().padding(start = 20.dp,end=20.dp,bottom=10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center){
+                if (existingItem != null) {
+                    Row(modifier = Modifier,
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center) {
+                        IconButton(onClick = { onDecreaseQuantity(existingItem) }) {
+                            Icon(painterResource(R.drawable.minus),modifier= Modifier.size(10.dp), contentDescription = "Decrease Quantity")
+                        }
+                        Text(text = quantity.toString(), modifier = Modifier.padding(8.dp))
+                        IconButton(onClick = {onIncreaseQuantity(existingItem)}) {
+                            Icon(painterResource(R.drawable.plus),modifier= Modifier.size(15.dp), contentDescription = "Increase Quantity")
+                        }
+                    }
+                }else {
+                    // Add to Cart Button
+                    Button(
+                        onClick = {onAddToCartClick(product)},
+                        modifier = Modifier.width(itemSize),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(text = "ADD TO CART")
+                    }
+                }
+                Spacer(modifier = Modifier.width(15.dp))
+                Button(
+                    onClick = {Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()} ,
+                    modifier = Modifier.width(itemSize),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "Buy Now")
+                }
 
-            // Add to Cart Button
-            Button(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth().padding(start=15.dp,end=15.dp, bottom = 10.dp),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(text = "ADD TO CART")
             }
+
         }
 
     }

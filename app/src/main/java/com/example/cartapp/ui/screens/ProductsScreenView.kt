@@ -12,9 +12,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.example.cartapp.R
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -46,6 +48,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +63,7 @@ import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,14 +72,14 @@ import androidx.compose.ui.unit.dp
 import com.app.cartApp.compose.publicsansBold
 import com.example.cartapp.data.viewmodel.ProductViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.asFlow
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.example.cartapp.data.model.CartItem
 import com.example.cartapp.data.model.ProductData
 import com.example.cartapp.data.viewmodel.CartViewModel
-import com.example.cartapp.ui.screens.activity.CartActivity
 import com.example.cartapp.ui.screens.activity.ProductDetailActivity
+import kotlinx.coroutines.delay
 import java.text.DecimalFormat
 
 
@@ -101,7 +106,7 @@ fun ProductsScreenView(navController: NavController) {
 
                         ProductCard(
                             product=product,
-                            onAddToCartClick = { cartViewModel.addToCart(it) },
+                            onAddToCartClick = { cartViewModel.addOrUpdateCartItem(it) },
                             onIncreaseQuantity = {cartViewModel.increaseQuantity(it)},
                             onDecreaseQuantity = {cartViewModel.decreaseQuantity(it)}
                         )
@@ -113,20 +118,29 @@ fun ProductsScreenView(navController: NavController) {
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ProductCard(
     product: ProductData,
     onAddToCartClick: (ProductData) -> Unit,
-    onIncreaseQuantity: (Int) -> Unit,
-    onDecreaseQuantity: (Int) -> Unit
+    onIncreaseQuantity: (CartItem) -> Unit,
+    onDecreaseQuantity: (CartItem) -> Unit
 ) {
     val cartViewModel =hiltViewModel<CartViewModel>()
     val context=LocalContext.current
     val itemSize: Dp = (LocalConfiguration.current.screenWidthDp.dp / 2)
     // Observe the cart items
-    val cartItems = cartViewModel.cartItems
-    val existingItem = cartItems.find { it.product.id == product.id }
+    val cartItems = cartViewModel.cartItems.collectAsState()
+    val existingItem = cartItems.value.find { it.product.id == product.id }
     val quantity = existingItem?.quantity ?: 0
+
+    LaunchedEffect(true) {
+        while (true) {
+            delay(100)
+            cartViewModel.fetchCartItems()
+        }
+    }
+
     Card(
         modifier = Modifier.width(itemSize)
             .padding(8.dp).clickable(){
@@ -169,7 +183,7 @@ fun ProductCard(
             Text(
                 text = product.title,
                 fontFamily = publicsansBold,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
@@ -225,22 +239,20 @@ fun ProductCard(
 
             Spacer(modifier = Modifier.height(8.dp))
             if (existingItem != null) {
-                Row {
-                    IconButton(onClick = { onDecreaseQuantity(product.id)
-                        Log.d("cartItem","${cartItems}")}) {
-                        Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Decrease Quantity")
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                    IconButton(onClick = { onDecreaseQuantity(existingItem) }) {
+                        Icon(painter = painterResource(R.drawable.minus),modifier= Modifier.size(10.dp), contentDescription = "Decrease Quantity")
                     }
                     Text(text = quantity.toString(), modifier = Modifier.padding(8.dp))
-                    IconButton(onClick = {onIncreaseQuantity(product.id)
-                        Log.d("cartItem","${cartItems}")}) {
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Increase Quantity")
+                    IconButton(onClick = {onIncreaseQuantity(existingItem)}) {
+                        Icon(painterResource(R.drawable.plus),modifier= Modifier.size(15.dp), contentDescription = "Increase Quantity")
                     }
                 }
             }else{
                 // Add to Cart Button
                 Button(
-                    onClick = {onAddToCartClick(product)
-                              Log.d("cartItem","${cartItems}")} ,
+                    onClick = {onAddToCartClick(product) } ,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {

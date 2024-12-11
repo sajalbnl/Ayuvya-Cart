@@ -2,6 +2,7 @@ package com.example.cartapp
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,10 +18,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -46,10 +52,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.app.cartApp.compose.publicsansBold
 import com.app.cartApp.compose.publicsansRegular
+import com.example.cartapp.data.viewmodel.CartViewModel
 import com.example.cartapp.ui.screens.HomeScreen
 import com.example.cartapp.ui.screens.ProductsScreenView
 import com.example.cartapp.ui.screens.ProfileScreenView
 import com.example.cartapp.ui.screens.activity.CartActivity
+import kotlinx.coroutines.delay
 
 @Composable
 fun NavHostContainer(
@@ -167,13 +175,26 @@ fun AddItem(
 @Composable
 fun TopBar(navController: NavController){
     val context= LocalContext.current
-    Row(modifier= Modifier.fillMaxWidth().padding(top=50.dp,start=20.dp,end=20.dp)) {
+    Row(modifier= Modifier.fillMaxWidth().padding(top=50.dp,start=20.dp,end=20.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        val cartViewModel =hiltViewModel<CartViewModel>()
+        val cartItems = cartViewModel.cartItems.collectAsState().value
+        val cartSize = remember(cartItems) { cartItems.size }
+
+        LaunchedEffect(true) {
+            while (true) {
+                delay(100)
+                cartViewModel.fetchCartItems()
+            }
+        }
 
         Image(
             painterResource(R.drawable.profile_top),
             contentDescription = "",
             modifier = Modifier
-                .width(25.dp).clickable(){
+                .width(20.dp).clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ){
                     navController.navigate("profile") {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
@@ -195,14 +216,37 @@ fun TopBar(navController: NavController){
             color = Color("#000000".toColorInt()),
         )
         Spacer(modifier=Modifier.weight(1f))
-        Image(
-            painterResource(R.drawable.cart_img),
-            contentDescription = "",
-            modifier = Modifier
-                .width(25.dp).clickable(){
-                    val i = Intent(context, CartActivity::class.java)
-                    context.startActivity(i)
-                }
-        )
+        Box( modifier = Modifier
+            .size(50.dp)){
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(20.dp)
+                    .background(Color.Gray, shape = CircleShape)
+            ) {
+                Text(
+                    text = cartSize.toString(),
+                    fontSize = 8.sp,
+                    color = Color.White,
+                    fontFamily = publicsansBold,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            Image(
+                painterResource(R.drawable.cart_img),
+                contentDescription = "",
+                modifier = Modifier.align(Alignment.Center)
+                    .width(20.dp).clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ){
+                        val i = Intent(context, CartActivity::class.java)
+                        context.startActivity(i)
+                    }
+            )
+
+        }
+
     }
 }

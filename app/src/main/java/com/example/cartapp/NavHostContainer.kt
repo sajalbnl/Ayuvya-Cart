@@ -96,7 +96,7 @@ fun BottomBar(navController: NavHostController) {
 
     Row(
         modifier = Modifier
-            .padding(start=10.dp,end=10.dp,bottom=20.dp)
+            .padding(start=10.dp,end=10.dp,bottom=50.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color("#bdd5f0".toColorInt()))
             .fillMaxWidth().border(BorderStroke(1.dp, Color("#bdd5f0".toColorInt())),

@@ -18,7 +18,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.toColorInt
 import androidx.navigation.compose.rememberNavController
 import com.example.cartapp.ui.theme.CartAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var currentDestination: MutableState<String>
     override fun onCreate(savedInstanceState: Bundle?) {

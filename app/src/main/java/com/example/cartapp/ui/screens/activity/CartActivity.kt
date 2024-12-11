@@ -2,14 +2,17 @@ package com.example.cartapp.ui.screens.activity
 
 
 import android.app.Activity
+import android.content.Intent
 import com.example.cartapp.R
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -62,6 +65,7 @@ import coil3.request.crossfade
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import com.app.cartApp.compose.publicsansBold
 import com.app.cartApp.compose.publicsansRegular
 import com.example.cartapp.data.model.CartItem
@@ -153,31 +157,57 @@ class CartActivity : ComponentActivity() {
                     )
                 }
             }
-            LazyColumn(modifier = Modifier.padding(top=10.dp).weight(1f)) {
-                items(cartItems.value.size) { index ->
-                    ProductItem(product = cartItems.value[index],
-                        onDeleteCartItem = { cartViewModel.deleteCartItem(it) },
-                        onIncreaseQuantity = {cartViewModel.increaseQuantity(it)},
-                        onDecreaseQuantity = {cartViewModel.decreaseQuantity(it)})
-                }
-            }
-            Row(modifier= Modifier.padding(start = 30.dp,end=30.dp,bottom=10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center) {
-                Column {
-                    Text(text = "₹$discountedPrice", fontFamily =publicsansBold, fontSize = 16.sp)
-                    Text(text = "Grand total", fontFamily = publicsansRegular, fontSize = 16.sp)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
-                    onClick = {Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()} ,
-                    modifier = Modifier.width(itemSize),
-                    shape = RoundedCornerShape(8.dp)
+
+            if(cartItems.value.size==0){
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Check Out")
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+
+                        Text(
+                            text ="Your Cart Is Empty",
+                            fontSize = 20.sp,
+                            color = Color("#242533".toColorInt()),
+                            fontFamily = publicsansBold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }else{
+                LazyColumn(modifier = Modifier.padding(top=10.dp).weight(1f)) {
+                    items(cartItems.value.size) { index ->
+                        ProductItem(product = cartItems.value[index],
+                            onDeleteCartItem = { cartViewModel.deleteCartItem(it) },
+                            onIncreaseQuantity = {cartViewModel.increaseQuantity(it)},
+                            onDecreaseQuantity = {cartViewModel.decreaseQuantity(it)})
+                    }
+                }
+                Row(modifier= Modifier.padding(start = 30.dp,end=30.dp,bottom=10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                    Column {
+                        Text(text = "₹$discountedPrice", fontFamily =publicsansBold, fontSize = 16.sp)
+                        Text(text = "Grand total", fontFamily = publicsansRegular, fontSize = 16.sp)
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = {Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()} ,
+                        modifier = Modifier.width(itemSize),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(text = "Check Out")
+                    }
+
                 }
 
             }
+
         }
 
     }

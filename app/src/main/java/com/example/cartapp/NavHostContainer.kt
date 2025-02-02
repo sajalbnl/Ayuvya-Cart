@@ -95,10 +95,9 @@ fun BottomBar(navController: NavHostController) {
     val currentDestination = navStackBackEntry?.destination
 
     Row(
-        modifier = Modifier
+        modifier = Modifier.background(Color("#bdd5f0".toColorInt()))
             .padding(start=10.dp,end=10.dp,bottom=50.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color("#bdd5f0".toColorInt()))
             .fillMaxWidth().border(BorderStroke(1.dp, Color("#bdd5f0".toColorInt())),
                 RoundedCornerShape(20)),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -175,7 +174,7 @@ fun AddItem(
 @Composable
 fun TopBar(navController: NavController){
     val context= LocalContext.current
-    Row(modifier= Modifier.fillMaxWidth().padding(top=50.dp,start=20.dp,end=20.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier= Modifier.fillMaxWidth().background(Color("#bdd5f0".toColorInt())).padding(top=50.dp,start=20.dp,end=20.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
         val cartViewModel =hiltViewModel<CartViewModel>()
         val cartItems = cartViewModel.cartItems.collectAsState().value
         val cartSize = remember(cartItems) { cartItems.size }
@@ -207,7 +206,7 @@ fun TopBar(navController: NavController){
         Spacer(modifier=Modifier.weight(1f))
 
         Text(
-            text = "AYUVYA",
+            text = "Cartify",
             modifier = Modifier.padding(top=5.dp),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,

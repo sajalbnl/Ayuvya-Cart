@@ -69,8 +69,6 @@ import androidx.compose.ui.res.stringResource
 import com.app.cartApp.compose.publicsansBold
 import com.app.cartApp.compose.publicsansRegular
 import com.example.cartapp.data.model.CartItem
-import com.example.cartapp.data.model.ProductData
-import com.example.cartapp.data.model.Rating
 import com.example.cartapp.data.viewmodel.CartViewModel
 import com.example.cartapp.ui.theme.CartAppTheme
 import dagger.hilt.android.AndroidEntryPoint

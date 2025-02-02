@@ -59,7 +59,7 @@ fun ProfileScreenView(navController: NavController) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color("#ffffff".toColorInt()))) {
+    Column(modifier = Modifier.fillMaxSize().background(Color("#bdd5f0".toColorInt()))) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,7 +89,7 @@ fun ProfileScreenView(navController: NavController) {
             modifier = Modifier
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp)
                 .border(
-                    BorderStroke(1.dp, Color("#C9C9C9".toColorInt())),
+                    BorderStroke(1.dp, Color("#333333".toColorInt())),
                     RoundedCornerShape(15)
                 )
                 .clickable(indication = null,
@@ -142,7 +142,7 @@ fun ProfileScreenView(navController: NavController) {
             modifier = Modifier
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp)
                 .border(
-                    BorderStroke(1.dp, Color("#C9C9C9".toColorInt())),
+                    BorderStroke(1.dp, Color("#333333".toColorInt())),
                     RoundedCornerShape(15)
                 )
                 .clickable(indication = null,
@@ -181,7 +181,7 @@ fun ProfileScreenView(navController: NavController) {
             modifier = Modifier
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp)
                 .border(
-                    BorderStroke(1.dp, Color("#C9C9C9".toColorInt())),
+                    BorderStroke(1.dp, Color("#333333".toColorInt())),
                     RoundedCornerShape(15)
                 )
                 .clickable(indication = null,
@@ -220,7 +220,7 @@ fun ProfileScreenView(navController: NavController) {
             modifier = Modifier
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp)
                 .border(
-                    BorderStroke(1.dp, Color("#C9C9C9".toColorInt())),
+                    BorderStroke(1.dp, Color("#333333".toColorInt())),
                     RoundedCornerShape(15)
                 )
                 .clickable(indication = null,
@@ -259,7 +259,7 @@ fun ProfileScreenView(navController: NavController) {
             modifier = Modifier
                 .padding(top = 20.dp, start = 20.dp, end = 20.dp)
                 .border(
-                    BorderStroke(1.dp, Color("#C9C9C9".toColorInt())),
+                    BorderStroke(1.dp, Color("#333333".toColorInt())),
                     RoundedCornerShape(15)
                 )
                 .clickable(indication = null,

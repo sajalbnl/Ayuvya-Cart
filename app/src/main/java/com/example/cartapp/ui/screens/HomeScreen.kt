@@ -2,6 +2,7 @@ package com.example.cartapp.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +53,7 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         productViewModel.fetchProducts()
     }
-    Column(modifier = Modifier.fillMaxSize(),
+    Column(modifier = Modifier.fillMaxSize().background(Color("#bdd5f0".toColorInt())),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
         Card(

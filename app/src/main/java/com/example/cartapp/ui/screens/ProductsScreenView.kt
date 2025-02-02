@@ -94,7 +94,7 @@ fun ProductsScreenView(navController: NavController) {
     LaunchedEffect(Unit) {
         productViewModel.fetchProducts()
     }
-    LazyColumn() {
+    LazyColumn(modifier = Modifier.fillMaxSize().background(Color("#bdd5f0".toColorInt()))) {
         item{
             FlowRow(modifier = Modifier
                 .fillMaxWidth()
@@ -152,7 +152,6 @@ fun ProductCard(
     ) {
         Column(
             modifier = Modifier
-                .padding(8.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -172,95 +171,108 @@ fun ProductCard(
                     contentDescription = "",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp),
+                        .height(150.dp),
                     contentScale = ContentScale.Crop
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Product Name
-            Text(
-                text = product.title,
-                fontFamily = publicsansBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Pricing and Discount
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(8.dp)
             ) {
+                // Product Name
                 Text(
-                    text = "₹${product.price}",
+                    text = product.title,
                     fontFamily = publicsansBold,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        textDecoration = TextDecoration.LineThrough,
-                        color = Color.Gray
-                    )
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                val decimalFormat = DecimalFormat("#.##")
-                val discountedPrice = decimalFormat.format(product.price * 0.8)
-                Text(
-                    text = "₹$discountedPrice",
-                    fontFamily = publicsansBold,
-                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
 
-            }
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "20% off",
-                style = MaterialTheme.typography.bodySmall.copy(color = Color("#37877f".toColorInt()))
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-
-            // Rating
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    tint = Color(0xFFFFC107),
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text =product.rating.rate.toFloat().toString(),
-                 //   style = MaterialTheme.typography.body2
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            if (existingItem != null) {
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                    IconButton(onClick = { onDecreaseQuantity(existingItem) }) {
-                        Icon(painter = painterResource(R.drawable.minus),modifier= Modifier.size(10.dp), contentDescription = "Decrease Quantity")
-                    }
-                    Text(text = quantity.toString(), modifier = Modifier.padding(8.dp))
-                    IconButton(onClick = {onIncreaseQuantity(existingItem)}) {
-                        Icon(painterResource(R.drawable.plus),modifier= Modifier.size(15.dp), contentDescription = "Increase Quantity")
-                    }
-                }
-            }else{
-                // Add to Cart Button
-                Button(
-                    onClick = {onAddToCartClick(product) } ,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
+                // Pricing and Discount
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "ADD TO CART")
+                    Text(
+                        text = "₹${product.price}",
+                        fontFamily = publicsansBold,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            textDecoration = TextDecoration.LineThrough,
+                            color = Color.Gray
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    val decimalFormat = DecimalFormat("#.##")
+                    val discountedPrice = decimalFormat.format(product.price * 0.8)
+                    Text(
+                        text = "₹$discountedPrice",
+                        fontFamily = publicsansBold,
+                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                }
+
+                Text(
+                    text = "20% off",
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color("#37877f".toColorInt()))
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+
+
+                // Rating
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = product.rating.rate.toFloat().toString(),
+                        //   style = MaterialTheme.typography.body2
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                if (existingItem != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        IconButton(onClick = { onDecreaseQuantity(existingItem) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.minus),
+                                modifier = Modifier.size(10.dp),
+                                contentDescription = "Decrease Quantity"
+                            )
+                        }
+                        Text(text = quantity.toString(), modifier = Modifier.padding(8.dp))
+                        IconButton(onClick = { onIncreaseQuantity(existingItem) }) {
+                            Icon(
+                                painterResource(R.drawable.plus),
+                                modifier = Modifier.size(15.dp),
+                                contentDescription = "Increase Quantity"
+                            )
+                        }
+                    }
+                } else {
+                    // Add to Cart Button
+                    Button(
+                        onClick = { onAddToCartClick(product) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(text = "ADD TO CART")
+                    }
                 }
             }
-
-
         }
     }
 }

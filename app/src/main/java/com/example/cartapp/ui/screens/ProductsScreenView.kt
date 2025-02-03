@@ -94,7 +94,12 @@ fun ProductsScreenView(navController: NavController) {
     LaunchedEffect(Unit) {
         productViewModel.fetchProducts()
     }
-    LazyColumn(modifier = Modifier.fillMaxSize().background(Color("#bdd5f0".toColorInt()))) {
+    LazyColumn(modifier = Modifier.fillMaxSize().background(brush = Brush.verticalGradient(
+        colors = listOf(
+            Color("#bdd5f0".toColorInt()),
+            Color("#ffffff".toColorInt()),
+        )
+    ))) {
         item{
             FlowRow(modifier = Modifier
                 .fillMaxWidth()
@@ -276,17 +281,21 @@ fun ProductCard(
         }
     }
 }
+@OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
+
 fun ExcitingDealsShimmerLoaderView() {
-    val items = (1..10).map { "Item $it" }
+    val items = (1..15).map { "Item $it" }
     Box(modifier = Modifier.fillMaxSize().padding(top = 20.dp)) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                state = rememberLazyListState()
-            ) {
-                itemsIndexed(items) { index, item ->
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+
+                ) {
+                items.forEach { item ->
                     Box(
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(24.dp))
@@ -308,26 +317,6 @@ fun ExcitingDealsShimmerLoaderView() {
                                     .fillMaxWidth()
                                     .height(130.dp)
                                     .shimmerLoadingAnimationApi()
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-                                    .clip(shape = RoundedCornerShape(10.dp))
-                                    .background(color = Color.LightGray)
-                                    .fillMaxWidth()
-                                    .height(20.dp)
-                                    .shimmerLoadingAnimationApi()
-
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-                                    .clip(shape = RoundedCornerShape(10.dp))
-                                    .background(color = Color.LightGray)
-                                    .fillMaxWidth()
-                                    .height(20.dp)
-                                    .shimmerLoadingAnimationApi()
-
                             )
                             Box(
                                 modifier = Modifier

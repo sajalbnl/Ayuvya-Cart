@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -59,7 +60,12 @@ fun ProfileScreenView(navController: NavController) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color("#bdd5f0".toColorInt()))) {
+    Column(modifier = Modifier.fillMaxSize().background(brush = Brush.verticalGradient(
+        colors = listOf(
+            Color("#bdd5f0".toColorInt()),
+            Color("#ffffff".toColorInt()),
+        )
+    ))) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -138,161 +144,63 @@ fun ProfileScreenView(navController: NavController) {
                 }
             }
         }
-        Box(
-            modifier = Modifier
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp)
-                .border(
-                    BorderStroke(1.dp, Color("#333333".toColorInt())),
-                    RoundedCornerShape(15)
-                )
-                .clickable(indication = null,
-                    interactionSource = remember { MutableInteractionSource() }) {
-                    Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
-
-                }
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 15.dp, bottom = 15.dp,end=10.dp)
-            ) {
-                Row(
-                    Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.truck),
-                        contentDescription = "avatar",
-                        modifier = Modifier
-                            .size(25.dp)
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 15.dp),
-                        fontFamily = publicsansRegular,
-                        text ="Track Order",
-                        color = Color("#333333".toColorInt()),
-                        fontSize = 15.sp
-                    )
-                }
-            }
+        ProfileCard("Track Order",R.drawable.truck){
+            Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
         }
-        Box(
-            modifier = Modifier
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp)
-                .border(
-                    BorderStroke(1.dp, Color("#333333".toColorInt())),
-                    RoundedCornerShape(15)
-                )
-                .clickable(indication = null,
-                    interactionSource = remember { MutableInteractionSource() }) {
-                    Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
-
-                }
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 15.dp, bottom = 15.dp,end=10.dp)
-            ) {
-                Row(
-                    Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.mail),
-                        contentDescription = "avatar",
-                        modifier = Modifier
-                            .size(25.dp)
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 15.dp),
-                        fontFamily = publicsansRegular,
-                        text ="Contact Us",
-                        color = Color("#333333".toColorInt()),
-                        fontSize = 15.sp
-                    )
-                }
-            }
+        ProfileCard("Contact Us",R.drawable.mail){
+            Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
         }
-        Box(
-            modifier = Modifier
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp)
-                .border(
-                    BorderStroke(1.dp, Color("#333333".toColorInt())),
-                    RoundedCornerShape(15)
-                )
-                .clickable(indication = null,
-                    interactionSource = remember { MutableInteractionSource() }) {
-                    Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
-
-                }
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 15.dp, bottom = 15.dp,end=10.dp)
-            ) {
-                Row(
-                    Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.star),
-                        contentDescription = "avatar",
-                        modifier = Modifier
-                            .size(25.dp)
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 15.dp),
-                        fontFamily = publicsansRegular,
-                        text ="Rate Us",
-                        color = Color("#333333".toColorInt()),
-                        fontSize = 15.sp
-                    )
-                }
-            }
+        ProfileCard("Rate Us",R.drawable.star){
+            Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
         }
-        Box(
-            modifier = Modifier
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp)
-                .border(
-                    BorderStroke(1.dp, Color("#333333".toColorInt())),
-                    RoundedCornerShape(15)
-                )
-                .clickable(indication = null,
-                    interactionSource = remember { MutableInteractionSource() }) {
-                    Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
+        ProfileCard("Follow Us",R.drawable.follow){
+            Toast.makeText(context, "Coming Soon...", Toast.LENGTH_SHORT).show()
+        }
 
-                }
+    }
+}
+
+@Composable
+fun ProfileCard(name:String,painter:Int,onClick:()->Unit){
+    val context= LocalContext.current as Activity
+    Box(
+        modifier = Modifier
+            .padding(top = 20.dp, start = 20.dp, end = 20.dp)
+            .border(
+                BorderStroke(1.dp, Color("#333333".toColorInt())),
+                RoundedCornerShape(15)
+            )
+            .clickable(indication = null,
+                interactionSource = remember { MutableInteractionSource() }) {
+                onClick()
+
+            }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 15.dp, bottom = 15.dp,end=10.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 15.dp, bottom = 15.dp,end=10.dp)
+                Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.follow),
-                        contentDescription = "avatar",
-                        modifier = Modifier
-                            .size(25.dp)
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 15.dp),
-                        fontFamily = publicsansRegular,
-                        text ="Follow Us",
-                        color = Color("#333333".toColorInt()),
-                        fontSize = 15.sp
-                    )
-                }
+                Image(
+                    painter = painterResource(painter),
+                    contentDescription = "avatar",
+                    modifier = Modifier
+                        .size(25.dp)
+                )
+                Text(
+                    modifier = Modifier.padding(start = 15.dp),
+                    fontFamily = publicsansRegular,
+                    text =name,
+                    color = Color("#333333".toColorInt()),
+                    fontSize = 15.sp
+                )
             }
         }
     }
+
 }
